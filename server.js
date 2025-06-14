@@ -47,12 +47,25 @@ app.get("/collectibles/:index", (req, res) => {
 });
 
 app.get("/shoes/", (req, res) => {
-  const minPrice = Number(req.query.minPrice) || "";
-  const maxPrice = Number(req.query.maxPrice) || "";
-  const type = req.query.type || "";
-  if (isNaN(minPrice) || isNaN(maxPrice)) {
-    res.send(`<h1>Please enter a valid number for the price</h1>`);
-  } else if (minPrice && maxPrice) {
+  const minPrice =
+    req.query.minPrice !== undefined ? Number(req.query.minPrice) : undefined;
+  const maxPrice =
+    req.query.maxPrice !== undefined ? Number(req.query.maxPrice) : undefined;
+  const type = req.query.type !== undefined ? req.query.type : undefined;
+  const validTypes = [...new Set(shoes.map((shoe) => shoe.type))];
+
+  if (
+    (isNaN(minPrice) && minPrice !== undefined) ||
+    (isNaN(maxPrice) && maxPrice !== undefined)
+  ) {
+    res.send(`<h1>Please enter a valid number for the price.</h1>`);
+  } else if (type !== undefined && !isNaN(type)) {
+    res.send(`<h1>Please enter a valid shoe type.</h1>`);
+  } else if (type !== undefined && !validTypes.includes(type)) {
+    res.send(
+      `<h1>Shoe type not found.<br />Valid types: ${validTypes.join(", ")}</h1>`
+    );
+  } else if (minPrice !== undefined && maxPrice !== undefined) {
     res.send(
       `<ul>${shoes
         .filter((shoe) => shoe.price >= minPrice && shoe.price <= maxPrice)
@@ -62,7 +75,7 @@ app.get("/shoes/", (req, res) => {
         )
         .join("")}</ul>`
     );
-  } else if (minPrice) {
+  } else if (minPrice !== undefined) {
     res.send(
       `<ul>${shoes
         .filter((shoe) => shoe.price >= minPrice)
@@ -72,7 +85,7 @@ app.get("/shoes/", (req, res) => {
         )
         .join("")}</ul>`
     );
-  } else if (maxPrice) {
+  } else if (maxPrice !== undefined) {
     res.send(
       `<ul>${shoes
         .filter((shoe) => shoe.price <= maxPrice)
@@ -82,7 +95,7 @@ app.get("/shoes/", (req, res) => {
         )
         .join("")}</ul>`
     );
-  } else if (type) {
+  } else if (type !== undefined) {
     res.send(
       `<ul>${shoes
         .filter((shoe) => shoe.type === type)
